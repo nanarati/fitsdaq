@@ -244,14 +244,15 @@
   }
   function fitnessAge(u) {
     if (u.age < 20) return null;
+    // 심폐(65세 이상은 8자보행) 기준 나이에 근력 백분위 보정(±최대 10세)
+    const c = components(u);
+    const adj = -(c.strength.pct - 50) * 0.2;
     if (!u.elder) {
       const aC = ageWhereMedian(u.sex, 'vo2', u.vo2, 22.5, 62.5, true);
-      const aG = ageWhereMedian(u.sex, 'grip', u.grip, 37.5, 87.5, true);
-      return Math.round(clamp(aC * 0.65 + aG * 0.35, 18, 85));
+      return Math.round(clamp(aC + adj, 18, 85));
     }
     const aF = ageWhereMedian(u.sex, 'fig8', u.fig8, 67.5, 87.5, false);
-    const aG = ageWhereMedian(u.sex, 'grip', u.grip, 37.5, 87.5, true);
-    return Math.round(clamp(aF * 0.6 + aG * 0.4, 50, 99));
+    return Math.round(clamp(aF + adj, 50, 99));
   }
 
   /* ---------- 생애 근력 차트(악력 기준) ---------- */

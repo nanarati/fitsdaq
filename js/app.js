@@ -342,7 +342,7 @@
       x.fillStyle = '#8c96aa'; x.font = `500 24px ${F}`; x.fillText(t[2], X + 30, Y + 154);
     });
     // mini life chart
-    const C = r.life.candles, X0 = 90, Y0 = 1020, CW = 900, CH = 190;
+    const C = r.life.candles, X0 = 90, Y0 = 1062, CW = 900, CH = 170;
     let lo = Infinity, hi = -Infinity; C.forEach(c => { lo = Math.min(lo, c.l, r.life.cutoff); hi = Math.max(hi, c.h); });
     const y = v => Y0 + CH - (v - lo) / (hi - lo) * CH;
     const band = CW / C.length;
@@ -357,7 +357,7 @@
       if (c.now) { x.globalAlpha = 1; x.strokeStyle = '#22e3a1'; x.lineWidth = 4; x.beginPath(); x.arc(cx, y(c.c), 12, 0, Math.PI * 2); x.stroke(); }
     });
     x.globalAlpha = 1;
-    x.fillStyle = '#8c96aa'; x.font = `500 24px ${F}`; x.fillText('생애 근력 차트 (10세 → 90세, 악력 기준)', 70, 1000);
+    x.fillStyle = '#8c96aa'; x.font = `500 24px ${F}`; x.fillText('생애 근력 차트 (10세 → 90세, 악력 기준)', 70, 1032);
     // footer
     x.fillStyle = '#5d677b'; x.font = `500 24px ${F}`;
     x.fillText('국민체력100 합성데이터 2만 명과 비교한 결과 · 의료 진단 아님', 70, 1290);
