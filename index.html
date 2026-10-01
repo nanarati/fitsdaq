@@ -42,6 +42,24 @@
       <span class="eyebrow">국민체력100 합성데이터 2만 명이 상장된 체력 거래소</span>
       <h1>내 몸, 오늘<br><em>얼마일까?</em></h1>
       <p class="lead">나이·성별이 같은 '업종' 안에서 내 체력의 시세를 매깁니다. 업종 순위와 체력나이, 20년 뒤 근력 주가 전망, 애널리스트 리포트까지 1분이면 받아볼 수 있습니다.</p>
+      <div class="card live" id="live" aria-live="polite">
+        <div class="live-top"><span class="live-dot" aria-hidden="true"></span><b>실시간 시세</b><span class="chip" id="lv-tag">예시 · 43세 직장인</span><span class="muted lv-hint" id="lv-hint">신청서에 입력하면 내 시세로 바로 바뀝니다</span></div>
+        <div class="live-main">
+          <div>
+            <div class="lv-name"><span id="lv-name"></span> <span class="muted mono" id="lv-code"></span></div>
+            <div class="lv-price"><b class="num" id="lv-price">-</b><span class="unit">원</span><span class="num" id="lv-chg"></span></div>
+            <div class="muted lv-sub" id="lv-sub"></div>
+          </div>
+          <div class="lv-chart" id="lv-chart"></div>
+        </div>
+        <div class="lv-kpis">
+          <div><span>체력나이</span><b class="num" id="lv-age">-</b></div>
+          <div><span>투자의견</span><b id="lv-op">-</b></div>
+          <div><span>12주 목표주가</span><b class="num" id="lv-tp">-</b></div>
+          <div><span>경고선 도달</span><b class="num" id="lv-del">-</b></div>
+        </div>
+        <button type="button" class="btn pri" id="lv-open">전체 리포트 보기 →</button>
+      </div>
       <div class="hero-stats">
         <div><b class="num">20,000</b><span>상장 종목<br>간소화 체력측정(합성)</span></div>
         <div><b class="num">150,000</b><span>체결 기록<br>체력측정 참여(합성)</span></div>
@@ -120,6 +138,7 @@
 
 <!-- ============ 내 종목 ============ -->
 <section id="v-stock" class="view" hidden>
+  <div class="card demo-banner" id="demo-banner" hidden>지금 보고 계신 화면은 <b id="demo-name">예시 종목</b>입니다. 내 체력으로 바꿔 보려면 <a href="#home">상장 신청서</a>에 입력해 주세요.</div>
   <div class="card empty" id="stock-empty"><b>아직 상장한 종목이 없습니다</b><p class="muted">1분이면 내 체력을 상장할 수 있습니다.</p><a class="btn pri" style="max-width:260px" href="#home">상장하러 가기</a></div>
   <div id="stock-body" hidden>
     <div class="card quote">
