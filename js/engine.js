@@ -304,7 +304,10 @@
 
   function report(u, c, score) {
     const list = Object.values(c).sort((a, b) => a.score - b.score);
-    const weak = list[0], weak2 = list[1], strong = list[list.length - 1];
+    const weak = list[0], weak2 = list[1];
+    const perf = list.filter(x => !x.neutral);
+    const bestPerf = perf[perf.length - 1];
+    const strong = bestPerf && bestPerf.score >= 35 ? bestPerf : list[list.length - 1];
     let opinion, opinionCls, opinionNote;
     if (score < 45) { opinion = '적극 매수'; opinionCls = 'sbuy'; opinionNote = '저평가 구간입니다. 체력은 낮은 구간에서 운동을 시작할 때 개선 폭이 가장 큽니다.'; }
     else if (score < 65) { opinion = '매수'; opinionCls = 'buy'; opinionNote = '업종 평균권입니다. 약한 지표 하나만 끌어올려도 주가가 눈에 띄게 오릅니다.'; }
