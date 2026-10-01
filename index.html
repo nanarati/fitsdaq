@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>핏스닥 FITSDAQ — 내 체력이 상장되는 거래소</title>
+<meta name="description" content="국민체력100 합성데이터 2만 명이 상장된 체력 거래소. 내 체력의 시세와 업종 순위, 20년 뒤 근력 주가 전망, 애널리스트 리포트를 받아보세요.">
+<meta name="theme-color" content="#0a0d13">
+<meta property="og:type" content="website">
+<meta property="og:title" content="핏스닥 FITSDAQ — 내 몸, 오늘 얼마일까?">
+<meta property="og:description" content="국민체력100 합성데이터로 매기는 내 체력의 시세. 체력나이·업종 순위·근력 주가 전망까지.">
+<meta property="og:image" content="assets/og.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="#home" aria-label="핏스닥 홈"><span class="logo-mark">F</span><b>핏스닥</b><small>FITSDAQ</small></a>
+    <nav class="tabs" aria-label="주요 메뉴">
+      <a href="#home" data-view="home">상장</a>
+      <a href="#stock" data-view="stock">내 종목</a>
+      <a href="#market" data-view="market">핏스피</a>
+      <a href="#board" data-view="board">종목 시세</a>
+      <a href="#about" data-view="about">공시</a>
+    </nav>
+  </div>
+</header>
+<div class="tape" aria-hidden="true"><div class="tape-inner" id="tape"></div></div>
+
+<main class="wrap">
+
+<!-- ============ 상장 ============ -->
+<section id="v-home" class="view">
+  <div class="hero">
+    <div>
+      <span class="eyebrow">국민체력100 합성데이터 2만 명이 상장된 체력 거래소</span>
+      <h1>내 몸, 오늘<br><em>얼마일까?</em></h1>
+      <p class="lead">나이·성별이 같은 '업종' 안에서 내 체력의 시세를 매깁니다. 업종 순위와 체력나이, 20년 뒤 근력 주가 전망, 애널리스트 리포트까지 1분이면 받아볼 수 있습니다.</p>
+      <div class="hero-stats">
+        <div><b class="num">20,000</b><span>상장 종목<br>간소화 체력측정(합성)</span></div>
+        <div><b class="num">150,000</b><span>체결 기록<br>체력측정 참여(합성)</span></div>
+        <div><b class="num">93,416</b><span>종목 시세<br>스포츠강좌이용권(합성)</span></div>
+      </div>
+      <div class="card mini-mkt" id="mini-mkt" role="link" tabindex="0" aria-label="핏스피 지수 보기">
+        <div><div class="lbl">핏스피 FITSPI · 국민 체력측정 참여지수</div><div class="v num" id="mini-v">-</div><div class="num" id="mini-c" style="font-size:13px"></div></div>
+        <div class="sp" id="mini-sp"></div>
+      </div>
+    </div>
+
+    <form id="ipo" class="card form" novalidate autocomplete="off">
+      <h2>상장 신청서</h2>
+      <p class="hint">모르는 항목은 '잘 모르겠어요'를 누르면 간단한 질문으로 추정합니다.</p>
+      <div class="field"><label for="f-name">종목명(닉네임)</label><input type="text" id="f-name" maxlength="12" placeholder="예: 현우체력"></div>
+      <div class="row">
+        <div class="field"><span class="lab">성별</span><div class="seg" id="f-sex"><button type="button" data-v="M" class="on">남성</button><button type="button" data-v="F">여성</button></div></div>
+        <div class="field"><label for="f-age">나이</label><input type="number" id="f-age" min="10" max="95" inputmode="numeric" placeholder="10~95"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="f-h">키 (cm)</label><input type="number" id="f-h" min="120" max="210" step="0.1" inputmode="decimal" placeholder="예: 172"></div>
+        <div class="field"><label for="f-w">몸무게 (kg)</label><input type="number" id="f-w" min="25" max="200" step="0.1" inputmode="decimal" placeholder="예: 70"></div>
+      </div>
+
+      <div class="box" id="box-grip">
+        <div class="lab"><span>근력 · 악력</span><div class="seg" data-mode="grip"><button type="button" class="on" data-v="in">입력</button><button type="button" data-v="q">잘 모르겠어요</button></div></div>
+        <div data-pane="in"><div class="field" style="margin:0"><input type="number" id="f-grip" min="3" max="90" step="0.1" inputmode="decimal" placeholder="악력 (kg) · 양손 중 높은 값"></div></div>
+        <div data-pane="q" class="quiz" hidden>
+          <label><input type="checkbox" class="gq"> 2L 생수 6개 묶음을 들고 계단 한 층을 쉬지 않고 오를 수 있다</label>
+          <label><input type="checkbox" class="gq"> 새 잼 병뚜껑을 도구 없이 열 수 있다</label>
+          <label><input type="checkbox" class="gq"> 주 2회 이상 근력운동(헬스·필라테스 등)을 한다</label>
+        </div>
+      </div>
+
+      <div class="box" id="box-vo2">
+        <div class="lab"><span>심폐지구력 · VO₂max</span><div class="seg" data-mode="vo2"><button type="button" data-v="in">입력</button><button type="button" class="on" data-v="q">잘 모르겠어요</button></div></div>
+        <div data-pane="in" hidden><div class="field" style="margin:0"><input type="number" id="f-vo2" min="10" max="80" step="0.1" inputmode="decimal" placeholder="스마트워치 '최대 산소 섭취량' (ml/kg/min)"></div></div>
+        <div data-pane="q"><div class="field" style="margin:0"><select id="f-par" aria-label="평소 활동량">
+          <option value="0">거의 움직이지 않는다 (계단도 피하는 편)</option>
+          <option value="1">가끔 가볍게 걷는다</option>
+          <option value="2" selected>가벼운 활동을 꾸준히 한다 (주 몇 번 산책)</option>
+          <option value="3">땀 나는 운동을 주 1시간 미만 한다</option>
+          <option value="4">땀 나는 운동을 주 1시간 이상 한다</option>
+          <option value="5">숨이 찬 운동(달리기 등)을 주 1시간 미만 한다</option>
+          <option value="6">숨이 찬 운동을 주 1~3시간 한다</option>
+          <option value="7">숨이 찬 운동을 주 3시간 넘게 한다</option>
+        </select></div></div>
+      </div>
+
+      <div class="box" id="box-fig8" hidden>
+        <div class="lab"><span>보행·협응 · 8자보행</span><div class="seg" data-mode="fig8"><button type="button" data-v="in">입력</button><button type="button" class="on" data-v="q">잘 모르겠어요</button></div></div>
+        <div data-pane="in" hidden><div class="field" style="margin:0"><input type="number" id="f-fig8" min="5" max="60" step="0.1" inputmode="decimal" placeholder="8자보행 기록 (초)"></div></div>
+        <div data-pane="q"><div class="row" style="align-items:end">
+          <div class="field" style="margin:0"><label for="f-walk">평소 걸음 속도</label><select id="f-walk"><option value="fast">또래보다 빠르다</option><option value="normal" selected>보통이다</option><option value="slow">느린 편이다</option><option value="vslow">많이 느리다</option></select></div>
+          <div class="quiz" style="margin:0"><label style="padding:8px 0"><input type="checkbox" id="f-fall"> 최근 1년 안에 넘어진 적이 있다</label></div>
+        </div></div>
+      </div>
+
+      <div class="field"><label for="f-sbp">혈압 수축기 (mmHg, 선택)</label><input type="number" id="f-sbp" min="80" max="200" inputmode="numeric" placeholder="모르면 비워두세요"></div>
+      <div class="err" id="f-err" role="alert"></div>
+      <p class="privacy">🔒 <span>입력값은 이 기기의 브라우저 안에서만 계산되며 어떤 서버로도 전송되지 않습니다.</span></p>
+      <button type="submit" class="btn pri">상장하기 · 내 시세 확인</button>
+      <div class="samples">
+        <button type="button" class="btn sec" data-sample="a">예시: 43세 직장인</button>
+        <button type="button" class="btn sec" data-sample="b">예시: 71세 어르신</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="steps">
+    <div class="step"><i>STEP 1 · 상장</i><b>내 체력을 종목으로 등록</b><p>나이·성별이 같은 업종의 합성 체력측정 기록과 비교해 시세를 매깁니다.</p></div>
+    <div class="step"><i>STEP 2 · 분석</i><b>업종 순위·체력나이·생애 차트</b><p>내 근력이 근감소증 경고선(상장폐지선)을 몇 살에 깨는지 미리 봅니다.</p></div>
+    <div class="step"><i>STEP 3 · 매수</i><b>운동으로 내 주가에 투자</b><p>약한 지표에 맞춘 종목(운동) 포트폴리오와 체력인증센터 방문 타이밍을 안내합니다.</p></div>
+  </div>
+</section>
+
+<!-- ============ 내 종목 ============ -->
+<section id="v-stock" class="view" hidden>
+  <div class="card empty" id="stock-empty"><b>아직 상장한 종목이 없습니다</b><p class="muted">1분이면 내 체력을 상장할 수 있습니다.</p><a class="btn pri" style="max-width:260px" href="#home">상장하러 가기</a></div>
+  <div id="stock-body" hidden>
+    <div class="card quote">
+      <div class="q-head">
+        <div><h2 id="q-name"></h2><span class="code mono" id="q-code"></span><span class="chip" id="q-sector"></span></div>
+        <div class="q-actions"><button class="btn sec sm" id="btn-share" type="button">📈 공유 카드</button><button class="btn sec sm" id="btn-edit" type="button">✏️ 실적 재공시</button></div>
+      </div>
+      <div class="q-price"><span class="big num" id="q-price"></span><span class="unit">원</span><span class="chg num" id="q-chg"></span></div>
+      <div class="q-sub" id="q-sub"></div>
+      <div class="kpis">
+        <div class="kpi"><div class="k">체력나이</div><div class="v num" id="k-fage"></div><div class="s" id="k-fage-s"></div></div>
+        <div class="kpi"><div class="k">투자의견</div><div class="v" id="k-op"></div><div class="s" id="k-op-s"></div></div>
+        <div class="kpi"><div class="k">12주 목표주가</div><div class="v num" id="k-tp"></div><div class="s" id="k-tp-s"></div></div>
+        <div class="kpi"><div class="k">상장폐지 경고선 도달</div><div class="v num" id="k-del"></div><div class="s" id="k-del-s"></div></div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h3>생애 근력 차트 <small>악력 기준 · 봉 1개 = 5년</small></h3>
+        <div class="chart-host" id="ch-life"></div>
+        <div class="legend"><span><i style="background:var(--up)"></i>상승봉</span><span><i style="background:var(--down)"></i>하락봉</span><span><i style="background:transparent;border-top:2px dashed var(--up);height:0;border-radius:0"></i>꾸준히 운동(강세)</span><span><i style="background:transparent;border-top:2px dashed var(--down);height:0;border-radius:0"></i>운동 부족(약세)</span><span><i style="background:transparent;border-top:2px dashed var(--gold);height:0;border-radius:0"></i>근감소증 경고선</span></div>
+        <p class="cap" id="life-cap"></p>
+      </div>
+      <div class="card">
+        <h3>재무제표 <small>업종 내 위치와 신용등급</small></h3>
+        <div id="fin"></div>
+        <p class="cap">막대의 흰 눈금이 업종 안에서 내 위치입니다(가운데 = 업종 중앙값). <span class="est">추정</span> 표시는 설문으로 추정한 값입니다.</p>
+      </div>
+    </div>
+
+    <div class="card report mt" id="report"></div>
+
+    <div class="grid2 even">
+      <div class="card">
+        <h3>추천 포트폴리오 <small>스포츠강좌 종목 시세 기준</small></h3>
+        <div class="tbl-scroll"><table class="t" id="pf"></table></div>
+        <p class="cap">월 수강료는 스포츠강좌이용권 이용실적(합성)의 종목별 승인금액 중앙값입니다. 실제 강좌 가격은 시설마다 다릅니다.</p>
+      </div>
+      <div class="card">
+        <h3>체력 쌍둥이 종목 <small>나와 가장 닮은 합성 체력 기록 5건</small></h3>
+        <div class="tbl-scroll"><table class="t" id="tw"></table></div>
+        <p class="cap" id="tw-cap"></p>
+      </div>
+    </div>
+
+    <div class="grid2 even">
+      <div class="card">
+        <h3>매수 타이밍 <small>체력인증센터 요일별 거래량</small></h3>
+        <div class="chart-host" id="ch-wd"></div>
+        <p class="cap" id="wd-cap"></p>
+      </div>
+      <div class="card">
+        <h3>내 주가 히스토리 <small>이 기기에 저장된 공시 기록</small></h3>
+        <div id="hist"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 핏스피 ============ -->
+<section id="v-market" class="view" hidden>
+  <div class="card">
+    <div class="mkt-head">
+      <div><div class="muted" style="font-size:13px">핏스피 FITSPI · 국민 체력측정 참여지수 (2015.12.31 = 1,000)</div>
+        <div><span class="idx num" id="m-idx"></span> <span class="num" id="m-chg" style="font-size:17px;font-weight:700"></span></div></div>
+      <div class="chip" id="m-asof"></div>
+    </div>
+    <div class="stats" id="m-stats"></div>
+  </div>
+  <div class="card mt">
+    <h3>핏스피 월봉 <small>최근 1년 누적 측정 건수 기반 · 아래는 연령층별 월 거래량</small></h3>
+    <div class="chart-host" id="ch-mkt"></div>
+    <div class="legend"><span><i style="background:#7c5cff"></i>유소년</span><span><i style="background:#3d8bff"></i>청소년</span><span><i style="background:#22e3a1"></i>성인</span><span><i style="background:#ffc145"></i>어르신</span></div>
+    <p class="cap">2020년 3월 코로나19 확산과 함께 측정이 사실상 멈추면서 지수가 고점 대비 크게 떨어졌고, 이후 회복해 사상 최고치를 다시 썼습니다. 지수는 합성데이터의 측정 건수로 계산한 참고용 지표입니다.</p>
+  </div>
+  <div class="grid2 even">
+    <div class="card"><h3>업종별 거래 비중 <small id="sec-y"></small></h3><div class="chart-host" id="ch-sec"></div><p class="cap" id="sec-cap"></p></div>
+    <div class="card"><h3>월별 계절성 <small>2022~2025년 월평균 측정 건수</small></h3><div class="chart-host" id="ch-season"></div><p class="cap" id="season-cap"></p></div>
+  </div>
+</section>
+
+<!-- ============ 종목 시세 ============ -->
+<section id="v-board" class="view" hidden>
+  <div class="card">
+    <h3>스포츠 종목 시세판 <small>강좌이용권 승인 기록으로 본 종목별 수강료와 거래량</small></h3>
+    <div class="toolbar">
+      <div class="seg" id="b-src"><button type="button" class="on" data-v="vs">스포츠강좌이용권</button><button type="button" data-v="ds">장애인스포츠강좌이용권</button></div>
+      <span class="chip" id="b-n"></span>
+    </div>
+    <div class="tbl-scroll"><table class="t board" id="board"></table></div>
+    <p class="cap">현재가 = 월 승인금액 중앙값, 평균가 = 월 승인금액 평균, 거래량 = 승인 건수, 전년비 = 2025년 건수 ÷ 2024년 건수. 헤더를 누르면 정렬됩니다. 합성데이터 기준이며 실제 시장 가격과 다를 수 있습니다.</p>
+  </div>
+  <div class="card mt">
+    <h3>지역별 인기 종목 <small>스포츠강좌이용권 · 시도별 거래량 상위 6</small></h3>
+    <div class="toolbar"><div class="field" style="margin:0;min-width:200px"><select id="b-sido" aria-label="시도 선택"></select></div></div>
+    <div class="chart-host" id="ch-sido"></div>
+  </div>
+</section>
+
+<!-- ============ 공시 ============ -->
+<section id="v-about" class="view doc" hidden>
+  <div class="card">
+    <h2>공시 · 서비스 안내</h2>
+    <p>핏스닥은 국민체육진흥공단이 공공데이터포털에 공개한 국민체력100·스포츠강좌이용권 합성데이터를 활용해, 개인의 체력을 '주식 시세'처럼 읽기 쉽게 보여주는 웹 서비스입니다. 실제 개인 기록이 아닌 합성데이터이기 때문에 '나와 닮은 사람(체력 쌍둥이)'을 보여주는 기능을 개인정보 걱정 없이 제공할 수 있습니다.</p>
+  </div>
+  <div class="card mt">
+    <h3>활용 데이터</h3>
+    <div class="tbl-scroll"><table class="t">
+      <tr><th>데이터</th><th>규모</th><th>핏스닥에서 쓰는 곳</th></tr>
+      <tr><td><a href="https://www.data.go.kr/data/15165476/fileData.do" target="_blank" rel="noopener">서울올림픽기념국민체육진흥공단_국민체력100 간소화 체력측정 결과(합성)</a></td><td class="num">20,000건</td><td>업종별 시세(백분위), 신용등급, 체력나이, 생애 근력 차트, 체력 쌍둥이</td></tr>
+      <tr><td><a href="https://www.data.go.kr/data/15165474/fileData.do" target="_blank" rel="noopener">서울올림픽기념국민체육진흥공단_국민체력100 체력측정 참여 현황(합성)</a></td><td class="num">150,000건</td><td>핏스피 지수, 연령층별 거래량, 요일·월별 계절성(매수 타이밍)</td></tr>
+      <tr><td><a href="https://www.data.go.kr/data/15165468/fileData.do" target="_blank" rel="noopener">서울올림픽기념국민체육진흥공단_스포츠강좌이용권 이용실적(합성)</a></td><td class="num">50,000건</td><td>종목 시세판, 지역별 인기 종목, 추천 포트폴리오 수강료</td></tr>
+      <tr><td><a href="https://www.data.go.kr/data/15165472/fileData.do" target="_blank" rel="noopener">서울올림픽기념국민체육진흥공단_장애인스포츠강좌이용권 이용실적(합성)</a></td><td class="num">50,000건</td><td>장애인 종목 시세판</td></tr>
+    </table></div>
+    <p class="cap">이용허락범위: 제한 없음(공공데이터포털 표기 기준). 출처: 서울올림픽기념국민체육진흥공단, 공공데이터포털(data.go.kr).</p>
+  </div>
+  <div class="card mt">
+    <h3>시세 산출 방법</h3>
+    <ul>
+      <li><b>업종</b>: 성별 × 5세 연령 구간. 각 업종의 측정값을 21개 분위수(1~99%)로 요약해 내 값의 업종 내 백분위를 계산합니다.</li>
+      <li><b>현재가</b>: 근력 35%, 심폐지구력(65세 이상은 8자보행) 40%, 체성분 15%, 혈압 10%를 가중 평균한 100점 만점 점수 × 1,000원입니다. 혈압을 입력하지 않으면 나머지 비중으로 다시 나눕니다. 공모가 50,000원은 업종 중앙값 수준을 뜻합니다.</li>
+      <li><b>근력</b>: 64세 이하는 체중 대비 악력(상대악력), 65세 이상은 악력(kg)으로 평가합니다.</li>
+      <li><b>체성분·혈압</b>: 백분위가 아니라 건강 기준 구간(BMI 18.5~22.9, 수축기 120mmHg 미만)에 가까울수록 높은 점수를 줍니다.</li>
+      <li><b>체력나이</b>: 내 VO₂max(65세 이상은 8자보행)와 악력이 몇 세의 업종 중앙값과 같은지 찾아 가중 평균합니다.</li>
+      <li><b>생애 근력 차트</b>: 지금의 악력 백분위가 나이 들어서도 유지된다고 가정한 기준 경로, 백분위가 15%p 오르는 강세 경로, 떨어지는 약세 경로를 연령별 분위수로 그립니다. 경고선은 아시아 근감소증 진단 기준(AWGS 2019)의 악력 저하 기준(남 28kg, 여 18kg)입니다.</li>
+      <li><b>업종 순위·체력 쌍둥이</b>: 업종별 무작위 표본(602건)의 점수 분포로 순위를 추정하고, BMI·악력·VO₂max(또는 8자보행) 거리로 가장 닮은 기록 5건을 찾습니다.</li>
+      <li><b>핏스피</b>: 일별 측정 건수의 직전 365일 누적값을 2015년 12월 31일 = 1,000으로 놓고 월별 시가·고가·저가·종가를 계산합니다.</li>
+    </ul>
+    <p class="cap">원천 데이터의 이상치(체중 25kg 미만, VO₂max 10 미만·80 초과, 혈압 0 등)는 제외했습니다. 분위수 표는 data 폴더에서 그대로 확인할 수 있습니다.</p>
+  </div>
+  <div class="card mt">
+    <h3>유의사항</h3>
+    <ul>
+      <li>핏스닥은 건강 상태를 진단하는 의료 서비스가 아닙니다. 결과는 합성데이터와의 비교로 만든 참고 정보입니다.</li>
+      <li>'주가', '투자의견' 등은 이해를 돕기 위한 비유이며 금융 상품과 관련이 없습니다. 핏스닥에는 '매도' 의견이 없습니다. 체력은 팔 수 없는 자산이니까요.</li>
+      <li>정확한 측정은 가까운 국민체력100 체력인증센터에서 무료로 받을 수 있습니다. <a href="https://nfa.kspo.or.kr" target="_blank" rel="noopener">국민체력100 바로가기</a></li>
+      <li>본 서비스는 공공데이터 활용 개인 개발 서비스이며, 국민체육진흥공단의 공식 서비스가 아닙니다.</li>
+    </ul>
+  </div>
+  <div class="card mt">
+    <h3>개인정보</h3>
+    <p>회원가입·로그인이 없고, 입력값은 브라우저 안에서만 계산됩니다. 공시 기록은 사용자의 기기(localStorage)에만 저장되며 '기록 지우기'로 언제든 삭제할 수 있습니다.</p>
+    <button type="button" class="btn sec sm" id="btn-clear">이 기기에 저장된 기록 지우기</button>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><b style="color:var(--text)">핏스닥 FITSDAQ</b> · 운영: 김현우 · 2026</p>
+    <p>데이터 출처: 서울올림픽기념국민체육진흥공단, 공공데이터포털(data.go.kr) — 국민체력100 간소화 체력측정 결과(합성), 체력측정 참여 현황(합성), 스포츠강좌이용권·장애인스포츠강좌이용권 이용실적(합성)</p>
+    <p>본 서비스는 의료 진단이나 금융 정보가 아니며, 국민체육진흥공단의 공식 서비스가 아닙니다.</p>
+  </div>
+</footer>
+
+<dialog id="dlg-share">
+  <canvas id="share-canvas" width="1080" height="1350" aria-label="공유 카드 미리보기"></canvas>
+  <div class="acts"><button class="btn pri" id="btn-dl" type="button">이미지 저장</button><button class="btn sec" id="btn-close" type="button">닫기</button></div>
+</dialog>
+
+<script src="data/fit-quantiles.js"></script>
+<script src="data/twins.js"></script>
+<script src="data/market.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
