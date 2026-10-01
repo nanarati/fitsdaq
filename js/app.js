@@ -26,6 +26,7 @@
   const VIEWS = ['home', 'stock', 'market', 'board', 'about'];
   function route() {
     let v = (location.hash || '#home').slice(1);
+    if (v === 'demo') { list(SAMPLES.a, true); return; }
     if (!VIEWS.includes(v)) v = 'home';
     VIEWS.forEach(x => { $('#v-' + x).hidden = x !== v; });
     $$('.tabs a').forEach(a => a.classList.toggle('on', a.dataset.view === v));
@@ -63,31 +64,32 @@
 
   function err(msg) { $('#f-err').textContent = msg || ''; return null; }
   function num(id) { const v = $(id).value.trim(); return v === '' ? null : +v; }
-  function readForm() {
+  function readForm(silent) {
+    const fail = m => (silent ? null : err(m));
     const raw = { name: $('#f-name').value.trim(), sex: $('#f-sex .on').dataset.v };
     raw.age = num('#f-age'); raw.h = num('#f-h'); raw.w = num('#f-w');
-    if (raw.age == null || raw.age < 10 || raw.age > 95) return err('나이는 10~95세 사이로 입력해 주세요.');
-    if (raw.h == null || raw.h < 120 || raw.h > 210) return err('키는 120~210cm 사이로 입력해 주세요.');
-    if (raw.w == null || raw.w < 25 || raw.w > 200) return err('몸무게는 25~200kg 사이로 입력해 주세요.');
+    if (raw.age == null || raw.age < 10 || raw.age > 95) return fail('나이는 10~95세 사이로 입력해 주세요.');
+    if (raw.h == null || raw.h < 120 || raw.h > 210) return fail('키는 120~210cm 사이로 입력해 주세요.');
+    if (raw.w == null || raw.w < 25 || raw.w > 200) return fail('몸무게는 25~200kg 사이로 입력해 주세요.');
     if ($('[data-mode=grip] .on').dataset.v === 'in') {
       raw.grip = num('#f-grip');
-      if (raw.grip == null) return err('악력을 입력하거나 \'잘 모르겠어요\'를 눌러 주세요.');
-      if (raw.grip < 3 || raw.grip > 90) return err('악력은 3~90kg 사이로 입력해 주세요.');
+      if (raw.grip == null) return fail('악력을 입력하거나 \'잘 모르겠어요\'를 눌러 주세요.');
+      if (raw.grip < 3 || raw.grip > 90) return fail('악력은 3~90kg 사이로 입력해 주세요.');
     } else raw.gripQuiz = $$('.gq').filter(c => c.checked).length;
     if (raw.age < 65) {
       if ($('[data-mode=vo2] .on').dataset.v === 'in') {
         raw.vo2 = num('#f-vo2');
-        if (raw.vo2 == null || raw.vo2 < 10 || raw.vo2 > 80) return err('VO₂max는 10~80 사이로 입력하거나 \'잘 모르겠어요\'를 눌러 주세요.');
+        if (raw.vo2 == null || raw.vo2 < 10 || raw.vo2 > 80) return fail('VO₂max는 10~80 사이로 입력하거나 \'잘 모르겠어요\'를 눌러 주세요.');
       } else raw.par = +$('#f-par').value;
     } else {
       if ($('[data-mode=fig8] .on').dataset.v === 'in') {
         raw.fig8 = num('#f-fig8');
-        if (raw.fig8 == null || raw.fig8 < 5 || raw.fig8 > 60) return err('8자보행 기록은 5~60초 사이로 입력하거나 \'잘 모르겠어요\'를 눌러 주세요.');
+        if (raw.fig8 == null || raw.fig8 < 5 || raw.fig8 > 60) return fail('8자보행 기록은 5~60초 사이로 입력하거나 \'잘 모르겠어요\'를 눌러 주세요.');
       } else { raw.walk = $('#f-walk').value; raw.fall = $('#f-fall').checked; }
     }
     const s = num('#f-sbp');
-    if (s != null) { if (s < 80 || s > 200) return err('혈압은 80~200mmHg 사이로 입력해 주세요.'); raw.sbp = s; }
-    err('');
+    if (s != null) { if (s < 80 || s > 200) return fail('혈압은 80~200mmHg 사이로 입력해 주세요.'); raw.sbp = s; }
+    if (!silent) err('');
     return raw;
   }
   function fillForm(raw) {
@@ -137,7 +139,10 @@
     if (!state.res) {
       const s = store.get();
       if (s.last) { state.raw = s.last; state.res = FX.evaluate(s.last); state.sample = false; }
+      else { state.raw = SAMPLES.a; state.res = FX.evaluate(SAMPLES.a); state.sample = true; }
     }
+    $('#demo-banner').hidden = !state.sample;
+    if (state.sample && state.raw) $('#demo-name').textContent = '예시 종목(' + state.raw.age + '세 ' + (state.raw.sex === 'F' ? '여성' : '남성') + ')';
     $('#stock-empty').hidden = !!state.res;
     $('#stock-body').hidden = !state.res;
     if (!state.res) return;
@@ -478,6 +483,49 @@
   }
   $('#b-src').addEventListener('pick', e => { boardSrc = e.detail; boardSort = { k: 1, dir: -1 }; renderBoard(); });
 
+  /* ---------- 실시간 시세 미리보기 ---------- */
+  let liveRaw = SAMPLES.a, liveIsUser = false, lastLivePrice = null, liveTimer;
+  function renderLive() {
+    const raw = readForm(true);
+    liveIsUser = !!raw;
+    liveRaw = raw || SAMPLES.a;
+    const r = FX.evaluate(liveRaw), u = r.u;
+    $('#lv-tag').textContent = liveIsUser ? '내 입력 · 실시간' : '예시 · 43세 직장인';
+    $('#lv-tag').className = 'chip' + (liveIsUser ? ' acc' : '');
+    $('#lv-hint').textContent = liveIsUser ? '값을 바꿀 때마다 시세가 다시 계산됩니다' : '신청서에 입력하면 내 시세로 바로 바뀝니다';
+    $('#lv-name').textContent = liveIsUser ? u.name : '예시·직장인';
+    $('#lv-code').textContent = r.code;
+    const pe = $('#lv-price');
+    pe.textContent = fmt(r.price);
+    if (lastLivePrice != null && lastLivePrice !== r.price) {
+      pe.classList.remove('flash-up', 'flash-down'); void pe.offsetWidth;
+      pe.classList.add(r.price > lastLivePrice ? 'flash-up' : 'flash-down');
+      setTimeout(() => pe.classList.remove('flash-up', 'flash-down'), 700);
+    }
+    lastLivePrice = r.price;
+    const diff = r.price - r.ipo;
+    $('#lv-chg').className = 'num ' + cls(diff);
+    $('#lv-chg').textContent = `${arr(diff)} ${fmt(Math.abs(diff))} (${sgn(r.change)}%)`;
+    $('#lv-sub').textContent = `${r.sector} 업종 ${fmt(r.rank.rank)}위 / ${fmt(r.rank.N)}종목 · 공모가 50,000원 대비`;
+    $('#lv-age').textContent = r.fitAge != null ? r.fitAge + '세' : '성장기';
+    $('#lv-op').innerHTML = `<span class="op ${r.rep.opinionCls}" style="font-size:14px">${r.rep.opinion}</span>`;
+    $('#lv-tp').textContent = fmt(r.rep.target) + '원';
+    const cr = r.life.cross;
+    $('#lv-del').textContent = cr.base == null ? '안전' : (cr.base <= u.age ? '도달' : cr.base + '세');
+    const data = r.life.candles.map(d => Object.assign({}, d, d.now ? { bull: d.c, bear: d.c } : {}));
+    FCH.candle($('#lv-chart'), {
+      data, height: 132, rightAxis: false, xEvery: 4, xfmt: l => l + '세', aria: '생애 근력 미니 차트',
+      refLines: [{ y: r.life.cutoff, label: '경고선 ' + r.life.cutoff + 'kg' }],
+      lines: [{ cls: 'bull', get: d => d.bull }, { cls: 'bear', get: d => d.bear }],
+      tip: d => `<b>${d.label}~${d.label + 4}세</b><br>악력 ${f1(d.c)}kg`
+    });
+  }
+  const scheduleLive = () => { clearTimeout(liveTimer); liveTimer = setTimeout(renderLive, 120); };
+  $('#ipo').addEventListener('input', scheduleLive);
+  $('#ipo').addEventListener('change', scheduleLive);
+  $$('#ipo .seg').forEach(sg => sg.addEventListener('pick', scheduleLive));
+  $('#lv-open').addEventListener('click', () => { const raw = readForm(true); if (raw) list(raw, false); else list(SAMPLES.a, true); });
+
   /* ---------- 티커 테이프 & 미니 지수 ---------- */
   function tape() {
     const O = MKT.ohlc, last = O[O.length - 1], prev = O[O.length - 2];
@@ -508,13 +556,14 @@
       if (v === 'stock' && state.res) { renderLife(state.res); renderWeekday(); renderHistory(); }
       if (v === 'market') renderMarket();
       if (v === 'board') renderSido();
-      if (v === 'home') tape();
+      if (v === 'home') { tape(); renderLive(); }
     }, 150);
   });
 
   /* ---------- 시작 ---------- */
   syncAgeBoxes();
   tape();
+  renderLive();
   route();
   if ('serviceWorker' in navigator && location.protocol === 'https:') {
     navigator.serviceWorker.register('sw.js').catch(() => { });
