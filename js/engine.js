@@ -92,6 +92,29 @@
     }
     return piecewise([[15, 40], [17, 62], [18.5, 92], [20, 100], [23, 100], [25, 80], [27.5, 62], [30, 45], [35, 25], [40, 15]], bmi);
   }
+  // 체성분계 선택 입력용 참고점수.
+  // 체지방률 참고범위: InBody 공개 안내(남 10~20%, 여 18~28%).
+  // 범위 밖 감점폭은 FITSDAQ 내부 시각화 규칙이며 진단 기준이 아니다.
+  function pbfScore(pbf, sex) {
+    const lo = sex === 'F' ? 18 : 10;
+    const hi = sex === 'F' ? 28 : 20;
+    if (pbf >= lo && pbf <= hi) return 100;
+    if (pbf < lo) return clamp(100 - (lo - pbf) * 7.5, 25, 100);
+    return clamp(100 - (pbf - hi) * 4.0, 15, 100);
+  }
+  function vflScore(v) {
+    if (v < 10) return 100;
+    return clamp(100 - (v - 9) * 8, 20, 100);
+  }
+  function bodyScore(u) {
+    const bmiS = bmiScore(u.bmi, u.age, u.sex);
+    if (u.bodyFat == null) return { score: bmiS, bmiScore: bmiS, pbfScore: null, vflScore: null, basis: 'BMI' };
+    const pbfS = pbfScore(u.bodyFat, u.sex);
+    if (u.vfl == null) return { score: bmiS * 0.35 + pbfS * 0.65, bmiScore: bmiS, pbfScore: pbfS, vflScore: null, basis: '체지방률·BMI' };
+    const vfS = vflScore(u.vfl);
+    return { score: bmiS * 0.30 + pbfS * 0.55 + vfS * 0.15, bmiScore: bmiS, pbfScore: pbfS, vflScore: vfS, basis: '체지방률·BMI·내장지방' };
+  }
+
   function sbpScore(sbp) {
     return piecewise([[85, 80], [95, 100], [119, 100], [129, 85], [139, 65], [159, 40], [180, 20]], sbp);
   }
@@ -103,7 +126,7 @@
   const W = { strength: 0.35, cardio: 0.40, body: 0.15, bp: 0.10 };
 
   /* ---------- 입력 정규화 ---------- */
-  // raw: {name, sex:'M'|'F', age, h, w, grip?, gripQuiz?, vo2?, par?, fig8?, walk?, fall?, sbp?}
+  // raw: {name, sex:'M'|'F', age, h, w, grip?, gripQuiz?, vo2?, par?, fig8?, walk?, fall?, bodyFat?, smm?, vfl?, sbp?}
   function normalize(raw) {
     const sex = raw.sex === 'F' ? 'F' : 'M';
     const age = clamp(Math.round(+raw.age), 10, 95);
@@ -141,10 +164,14 @@
         est.fig8 = true;
       }
     }
+    const bodyFat = raw.bodyFat != null && raw.bodyFat !== '' ? +raw.bodyFat : null;
+    const smm = raw.smm != null && raw.smm !== '' ? +raw.smm : null;
+    const vfl = raw.vfl != null && raw.vfl !== '' ? +raw.vfl : null;
+    const smi = smm != null ? smm / Math.pow(h / 100, 2) : null;
     const sbp = raw.sbp != null && raw.sbp !== '' ? +raw.sbp : null;
     return {
       name: (raw.name || '내 체력').trim().slice(0, 12) || '내 체력',
-      sex, age, h, w, bmi, elder, grip, relg, vo2, fig8, sbp, est
+      sex, age, h, w, bmi, elder, grip, relg, vo2, fig8, bodyFat, smm, vfl, smi, sbp, est
     };
   }
 
@@ -163,7 +190,16 @@
       c.cardio = { key: 'cardio', label: '보행·협응', sub: '8자보행', value: u.fig8, unit: '초', pct: 100 - raw, score: 100 - raw, est: !!u.est.fig8, lowerBetter: true };
     }
     const pB = pctOf(table(u.sex, 'bmi', u.age), u.bmi);
-    c.body = { key: 'body', label: '체성분', sub: 'BMI', value: u.bmi, unit: 'kg/m²', pct: pB, score: bmiScore(u.bmi, u.age, u.sex), est: false, neutral: true };
+    const bs = bodyScore(u);
+    c.body = {
+      key: 'body', label: '체성분',
+      sub: u.bodyFat != null ? bs.basis : 'BMI',
+      value: u.bodyFat != null ? u.bodyFat : u.bmi,
+      unit: u.bodyFat != null ? '%' : 'kg/m²',
+      pct: pB, score: bs.score, est: false, neutral: true,
+      bmi: u.bmi, bodyFat: u.bodyFat, smm: u.smm, smi: u.smi, vfl: u.vfl,
+      bmiScore: bs.bmiScore, pbfScore: bs.pbfScore, vflScore: bs.vflScore
+    };
     if (u.sbp) {
       const pP = pctOf(table(u.sex, 'sbp', u.age), u.sbp);
       c.bp = { key: 'bp', label: '혈압', sub: '수축기', value: u.sbp, unit: 'mmHg', pct: pP, score: sbpScore(u.sbp), est: false, neutral: true };
@@ -182,7 +218,7 @@
   function twinUser(t) {
     return {
       sex: t[0] === 1 ? 'M' : 'F', age: t[1] + 2, h: t[2], w: t[3], bmi: t[3] / Math.pow(t[2] / 100, 2),
-      grip: t[4], relg: t[5], vo2: t[6], fig8: t[7], sbp: t[8] || null, elder: t[1] >= 65, est: {}, label: t[1]
+      grip: t[4], relg: t[5], vo2: t[6], fig8: t[7], bodyFat: null, smm: null, vfl: null, smi: null, sbp: t[8] || null, elder: t[1] >= 65, est: {}, label: t[1]
     };
   }
   let twinCache = null;
@@ -309,12 +345,12 @@
     const bestPerf = perf[perf.length - 1];
     const strong = bestPerf && bestPerf.score >= 35 ? bestPerf : list[list.length - 1];
     let opinion, opinionCls, opinionNote;
-    if (score < 45) { opinion = '적극 매수'; opinionCls = 'sbuy'; opinionNote = '저평가 구간입니다. 체력은 낮은 구간에서 운동을 시작할 때 개선 폭이 가장 큽니다.'; }
-    else if (score < 65) { opinion = '매수'; opinionCls = 'buy'; opinionNote = '업종 평균권입니다. 약한 지표 하나만 끌어올려도 주가가 눈에 띄게 오릅니다.'; }
-    else if (score < 80) { opinion = '비중 확대'; opinionCls = 'buy'; opinionNote = '업종 상위권입니다. 지금 습관을 유지하면서 약한 지표를 보완하면 우량주로 올라섭니다.'; }
-    else { opinion = '보유 (우량주)'; opinionCls = 'hold'; opinionNote = '업종 최상위권입니다. 지금의 운동 습관이 곧 배당입니다. 꾸준히 유지하는 것이 가장 좋은 전략입니다.'; }
+    if (score < 45) { opinion = '기초 회복'; opinionCls = 'sbuy'; opinionNote = '가장 낮은 영역부터 부담 없이 개선하는 경로가 적합합니다.'; }
+    else if (score < 65) { opinion = '균형 개선'; opinionCls = 'buy'; opinionNote = '약한 영역 하나를 우선 보완하면 전체 균형이 좋아질 수 있습니다.'; }
+    else if (score < 80) { opinion = '강점 유지·보완'; opinionCls = 'buy'; opinionNote = '현재 강점을 유지하면서 약한 영역을 보완하는 경로가 적합합니다.'; }
+    else { opinion = '현재 균형 유지'; opinionCls = 'hold'; opinionNote = '전반적 균형이 좋으므로 현재의 활동 습관을 꾸준히 유지하는 것이 중요합니다.'; }
 
-    // 12주 목표주가: 최약 지표 +12p, 차약 지표 +6p
+    // 12주 개선 시나리오: 최약 지표 +12p, 차약 지표 +6p
     const c2 = JSON.parse(JSON.stringify(c));
     c2[weak.key].score = clamp(c2[weak.key].score + 12, 0, 100);
     if (weak2) c2[weak2.key].score = clamp(c2[weak2.key].score + 6, 0, 100);
@@ -322,11 +358,16 @@
     const target = priceOf(tScore);
 
     const risks = [];
+    const pbfRange = u.sex === 'F' ? [18, 28] : [10, 20];
+    if (u.bodyFat != null) {
+      if (u.bodyFat > pbfRange[1]) risks.push('체성분: 체지방률 ' + u.bodyFat.toFixed(1) + '%로 서비스 참고범위보다 높습니다.');
+      else if (u.bodyFat < pbfRange[0]) risks.push('체성분: 체지방률 ' + u.bodyFat.toFixed(1) + '%로 서비스 참고범위보다 낮습니다.');
+    } else if (u.bmi >= 25) risks.push('체성분: BMI ' + u.bmi.toFixed(1) + '로 체중 관리가 필요한 구간입니다.');
+    else if (u.bmi < 18.5) risks.push('체성분: BMI ' + u.bmi.toFixed(1) + '로 낮은 구간입니다.');
+    if (u.vfl != null && u.vfl >= 10) risks.push('체성분: 내장지방레벨 ' + Math.round(u.vfl) + '로 InBody 참고범위(10 미만)보다 높습니다.');
     list.forEach(x => {
-      if (x.key === 'body' && u.bmi >= 25) risks.push('체성분: BMI ' + u.bmi.toFixed(1) + '로 비만 기준(25 이상)에 해당합니다.');
-      else if (x.key === 'body' && u.bmi < 18.5) risks.push('체성분: BMI ' + u.bmi.toFixed(1) + '로 저체중 구간입니다. 근육량 확보가 우선입니다.');
-      else if (x.key === 'bp' && u.sbp >= 130) risks.push('혈압: 수축기 ' + u.sbp + 'mmHg입니다. 고강도 운동 전에 전문의와 상담하세요.');
-      else if ((x.key === 'strength' || x.key === 'cardio') && x.score < 30) risks.push(x.label + ': 업종 하위 ' + Math.round(x.pct) + '% 구간(' + x.rating + ')입니다.');
+      if (x.key === 'bp' && u.sbp >= 130) risks.push('혈압: 수축기 ' + u.sbp + 'mmHg입니다. 운동 강도는 개인 상태에 맞게 조절하세요.');
+      else if ((x.key === 'strength' || x.key === 'cardio') && x.score < 30) risks.push(x.label + ': 비교군 하위 ' + Math.round(x.pct) + '% 수준입니다.');
     });
 
     const weakDomain = weak.key === 'cardio' && u.elder ? 'mobility' : weak.key;
@@ -355,7 +396,10 @@
     const c = components(u);
     const score = composite(c);
     const price = priceOf(score);
-    const rank = sectorRank(u, score);
+    // 공공데이터 비교 순위는 체성분계 선택입력으로 왜곡되지 않도록 BMI 기반 비교점수로 계산
+    const peerU = Object.assign({}, u, { bodyFat: null, smm: null, vfl: null, smi: null });
+    const peerScore = composite(components(peerU));
+    const rank = sectorRank(u, peerScore);
     return {
       u, c, score, price,
       ipo: 50000,
