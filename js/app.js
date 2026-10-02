@@ -148,7 +148,7 @@
     if (!state.res) return;
     const r = state.res, u = r.u;
     $('#q-name').textContent = u.name;
-    $('#q-code').textContent = r.code;
+    $('#q-code').textContent = '';
     $('#q-sector').textContent = r.sector + ' 비교군' + (state.sample ? ' · 예시' : '');
     $('#q-price').textContent = f1(r.score);
     const delta = r.score - 50;
@@ -168,6 +168,9 @@
     const targetScore = r.score * (1 + r.rep.upside / 100);
     $('#k-tp').textContent = f1(targetScore) + '점';
     $('#k-tp-s').innerHTML = `<span class="up">현재보다 +${f1(targetScore - r.score)}점 시나리오</span>`;
+    $('#route-current').textContent = f1(r.score) + '점';
+    $('#route-focus').textContent = r.rep.weak.label;
+    $('#route-target').textContent = f1(targetScore) + '점';
     const cr = r.life.cross;
     if (cr.base != null && cr.base <= u.age) { $('#k-del').textContent = '도달'; $('#k-del-s').innerHTML = '<span class="down">근력 보강이 가장 시급합니다</span>'; }
     else if (cr.base == null) { $('#k-del').textContent = '안전'; $('#k-del-s').textContent = '100세까지 경고선 위(기준 경로)'; }
@@ -184,15 +187,20 @@
   }
 
   function renderMap(r) {
-    const rows = ['strength','cardio','body','bp'].filter(k => r.c[k]).map(k => ({
-      label: r.c[k].label,
-      value: Math.max(0, Math.min(100, r.c[k].score))
-    }));
+    const weakKey = r.rep.weak && r.rep.weak.key;
+    const weak2Key = r.rep.weak2 && r.rep.weak2.key;
+    const rows = ['strength','cardio','body','bp'].filter(k => r.c[k]).map(k => {
+      const cur = Math.max(0, Math.min(100, r.c[k].score));
+      let target = cur;
+      if (k === weakKey) target += 12;
+      else if (k === weak2Key) target += 6;
+      return { label: r.c[k].label, value: cur, target: Math.max(0, Math.min(100, target)) };
+    });
     FCH.radar($('#ch-map'), {
       items: rows,
       max: 100,
       reference: 50,
-      aria: '체력 나침반'
+      aria: '체력 나침반 현재 좌표와 12주 시나리오'
     });
   }
 
@@ -233,7 +241,7 @@
       const c = r.c[k];
       let pos;
       if (c.neutral) pos = `건강기준 ${Math.round(c.score)}점`;
-      else { const t = 100 - c.pct; pos = '업종 ' + (t <= 50 ? `상위 ${Math.max(1, Math.round(t))}%` : `하위 ${Math.max(1, Math.round(c.pct))}%`); }
+      else { const t = 100 - c.pct; pos = '비교군 ' + (t <= 50 ? `상위 ${Math.max(1, Math.round(t))}%` : `하위 ${Math.max(1, Math.round(c.pct))}%`); }
       const fill = c.neutral ? c.score : c.pct;
       const mk = c.neutral ? '' : `<div class="mk" style="left:calc(${c.pct}% - 1px)"></div>`;
       const val = c.key === 'body' ? f1(c.value) : c.key === 'bp' ? Math.round(c.value) : f1(c.value);
@@ -415,10 +423,10 @@
     const ytdBase = data.find(d => d.label === (+last.label.slice(0, 4) - 1) + '-12');
     const ytd = ytdBase ? (last.c / ytdBase.c - 1) * 100 : 0;
     $('#m-stats').innerHTML = [
-      ['사상 최고치', ath.h.toLocaleString('ko-KR', { maximumFractionDigits: 1 }), ath.label.replace('-', '.')],
-      ['코로나 낙폭', sgn((trough.l / pre.h - 1) * 100) + '%', `${pre.label.replace('-', '.')} → ${trough.label.replace('-', '.')}`],
-      ['전고점 회복', rec ? rec.label.replace('-', '.') : '-', '코로나 이전 고점 돌파'],
-      ['연초 대비', sgn(ytd) + '%', last.label.slice(0, 4) + '년 누적']
+      ['최고 참여지수', ath.h.toLocaleString('ko-KR', { maximumFractionDigits: 1 }), ath.label.replace('-', '.')],
+      ['코로나 시기 감소', sgn((trough.l / pre.h - 1) * 100) + '%', `${pre.label.replace('-', '.')} → ${trough.label.replace('-', '.')}`],
+      ['이전 수준 회복', rec ? rec.label.replace('-', '.') : '-', '코로나 이전 참여수준 회복'],
+      ['올해 변화', sgn(ytd) + '%', last.label.slice(0, 4) + '년 누적']
     ].map(s => `<div class="stat"><div class="k">${s[0]}</div><div class="v num">${s[1]}</div><div class="muted" style="font-size:12px">${s[2]}</div></div>`).join('');
     // 차트
     const trI = data.indexOf(trough), preI = data.indexOf(pre);
@@ -429,7 +437,7 @@
       series: [{key:'value', cls:'base', label:'참여지수'}],
       tip: (d, i) => { const v = MKT.vol.rows[i]; return `<b>${d.label.replace('-', '.')}</b><br>참여지수 ${f1(d.value)}<br>측정 ${fmt(v[0])}건`; }
     });
-    // 업종 비중(최근 완결 연도)
+    // 연령층 비중(최근 완결 연도)
     const yr = +last.label.slice(0, 4) - 1;
     const st = MKT.vol.start.split('-').map(Number);
     const sum = [0, 0, 0, 0];
@@ -514,8 +522,16 @@
     $('#lv-tp').textContent = f1(targetScore) + '점';
     const cr = r.life.cross;
     $('#lv-del').textContent = cr.base == null ? '100세+' : (cr.base <= u.age ? '현재' : cr.base + '세');
-    const items = ['strength','cardio','body','bp'].filter(k => r.c[k]).map(k => ({label:r.c[k].label,value:r.c[k].score}));
-    FCH.radar($('#lv-chart'), { items, max:100, reference:50, aria:'현재 체력 나침반', compact:true });
+    const weakKey = r.rep.weak && r.rep.weak.key;
+    const weak2Key = r.rep.weak2 && r.rep.weak2.key;
+    const items = ['strength','cardio','body','bp'].filter(k => r.c[k]).map(k => {
+      const cur = Math.max(0, Math.min(100, r.c[k].score));
+      let target = cur;
+      if (k === weakKey) target += 12;
+      else if (k === weak2Key) target += 6;
+      return {label:r.c[k].label,value:cur,target:Math.max(0,Math.min(100,target))};
+    });
+    FCH.radar($('#lv-chart'), { items, max:100, reference:50, aria:'현재 체력과 12주 시나리오 나침반', compact:true });
   }
   const scheduleLive = () => { clearTimeout(liveTimer); liveTimer = setTimeout(renderLive, 120); };
   $('#ipo').addEventListener('input', scheduleLive);

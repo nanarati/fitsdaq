@@ -215,6 +215,10 @@
     const pt=(i,v)=>{const a=-Math.PI/2+i*2*Math.PI/n,rr=R*(v/max);return [cx+Math.cos(a)*rr,cy+Math.sin(a)*rr];};
     [25,50,75,100].forEach(level=>{const pts=items.map((_,i)=>pt(i,level).join(',')).join(' ');el('polygon',{points:pts,class:'radar-grid'+(level===ref?' refgrid':'')},svg);});
     items.forEach((it,i)=>{const [x2,y2]=pt(i,max);el('line',{x1:cx,y1:cy,x2:x2,y2:y2,class:'radar-axis'},svg);const [lx,ly]=pt(i,compact?118:114);const t=el('text',{x:lx,y:ly,class:'radar-label','text-anchor':lx<cx-5?'end':lx>cx+5?'start':'middle'},svg);t.textContent=it.label;});
+    if (items.some(it=>it.target!=null)) {
+      const targetPoly=items.map((it,i)=>pt(i,Math.max(0,Math.min(max,it.target==null?it.value:it.target))).join(',')).join(' ');
+      el('polygon',{points:targetPoly,class:'radar-target'},svg);
+    }
     const poly=items.map((it,i)=>pt(i,Math.max(0,Math.min(max,it.value))).join(',')).join(' ');
     el('polygon',{points:poly,class:'radar-area'},svg);
     items.forEach((it,i)=>{const [px,py]=pt(i,Math.max(0,Math.min(max,it.value)));el('circle',{cx:px,cy:py,r:compact?3.5:5,class:'radar-dot'},svg);if(!compact){const t=el('text',{x:px,y:py-10,class:'radar-val','text-anchor':'middle'},svg);t.textContent=Math.round(it.value);}});
