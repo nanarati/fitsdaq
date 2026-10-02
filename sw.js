@@ -1,5 +1,5 @@
 /* 핏스닥 오프라인 캐시 */
-const CACHE = 'fitsdaq-v3-fitness-navigation';
+const CACHE = 'fitsdaq-v4-bodycomp';
 const CORE = ['./', 'index.html', 'css/style.css', 'js/engine.js', 'js/charts.js', 'js/app.js',
   'data/fit-quantiles.js', 'data/twins.js', 'data/market.js', 'manifest.webmanifest', 'assets/icon-192.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
