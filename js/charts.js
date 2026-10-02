@@ -176,5 +176,50 @@
     return svg;
   }
 
-  window.FCH = { candle, bars, spark };
+
+  function lines(host, opt) {
+    host.innerHTML = '';
+    host.style.position = 'relative';
+    const data = opt.data || [];
+    const W = Math.max(300, host.clientWidth || 640), H = opt.height || 280;
+    const m = {l:12,r:56,t:22,b:34}, iw=W-m.l-m.r, ih=H-m.t-m.b;
+    const svg = el('svg',{viewBox:`0 0 ${W} ${H}`,width:W,height:H,class:'chart',role:'img','aria-label':opt.aria||'선 차트'},host);
+    const keys=(opt.series||[]).map(s=>s.key);
+    let lo=Infinity, hi=-Infinity;
+    data.forEach(d=>keys.forEach(k=>{const v=d[k]; if(v!=null){lo=Math.min(lo,v);hi=Math.max(hi,v);}}));
+    (opt.refLines||[]).forEach(r=>{lo=Math.min(lo,r.y);hi=Math.max(hi,r.y);});
+    if(!isFinite(lo)||!isFinite(hi)){lo=0;hi=100;}
+    const pad=(hi-lo)*.08||1; lo-=pad; hi+=pad; if(opt.minY!=null) lo=Math.min(lo,opt.minY);
+    const x=i=>m.l+(data.length<=1?0:i/(data.length-1)*iw), y=v=>m.t+ih-(v-lo)/(hi-lo||1)*ih;
+    niceTicks(lo,hi,4).forEach(tv=>{ el('line',{x1:m.l,x2:m.l+iw,y1:y(tv),y2:y(tv),class:'grid'},svg); const tx=el('text',{x:m.l+iw+8,y:y(tv)+4,class:'axis'},svg);tx.textContent=opt.yfmt?opt.yfmt(tv):tv;});
+    const every=opt.xEvery||Math.ceil(data.length/8);
+    data.forEach((d,i)=>{if(i%every!==0&&i!==data.length-1)return; const tx=el('text',{x:x(i),y:H-10,class:'axis','text-anchor':'middle'},svg);tx.textContent=opt.xfmt?opt.xfmt(d.label,i):d.label;});
+    (opt.refLines||[]).forEach(r=>{el('line',{x1:m.l,x2:m.l+iw,y1:y(r.y),y2:y(r.y),class:'ref'},svg);const tx=el('text',{x:m.l+6,y:y(r.y)-6,class:'ref-label'},svg);tx.textContent=r.label;});
+    (opt.series||[]).forEach(s=>{
+      const pts=[]; data.forEach((d,i)=>{if(d[s.key]!=null)pts.push(`${x(i)},${y(d[s.key])}`);});
+      if(pts.length>1) el('polyline',{points:pts.join(' '),class:'traj '+(s.cls||'base')},svg);
+    });
+    data.forEach((d,i)=>{if(d.now && d.base!=null) el('circle',{cx:x(i),cy:y(d.base),r:5,class:'now-dot'},svg);});
+    const tip=tooltip(host); const hov=el('rect',{x:m.l,y:m.t,width:iw,height:ih,fill:'transparent'},svg);
+    const move=ev=>{const r=svg.getBoundingClientRect();const px=((ev.touches?ev.touches[0].clientX:ev.clientX)-r.left)*(W/r.width);const i=Math.max(0,Math.min(data.length-1,Math.round((px-m.l)/(iw||1)*(data.length-1))));tip.innerHTML=opt.tip?opt.tip(data[i],i):data[i].label;tip.style.display='block';tip.style.left=Math.min(r.width-tip.offsetWidth-4,Math.max(4,x(i)/W*r.width-tip.offsetWidth/2))+'px';tip.style.top='4px';};
+    hov.addEventListener('mousemove',move);hov.addEventListener('touchstart',move,{passive:true});hov.addEventListener('touchmove',move,{passive:true});hov.addEventListener('mouseleave',()=>tip.style.display='none');hov.addEventListener('touchend',()=>setTimeout(()=>tip.style.display='none',1500));
+    return svg;
+  }
+
+  function radar(host,opt) {
+    host.innerHTML='';
+    const items=opt.items||[], n=items.length; if(!n)return null;
+    const compact=!!opt.compact, W=Math.max(compact?220:300,host.clientWidth||420), H=compact?170:320;
+    const cx=W/2,cy=H/2+(compact?4:8),R=Math.min(W,H)*(compact?.32:.36), max=opt.max||100, ref=opt.reference==null?50:opt.reference;
+    const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,width:W,height:H,class:'chart radar',role:'img','aria-label':opt.aria||'레이더 차트'},host);
+    const pt=(i,v)=>{const a=-Math.PI/2+i*2*Math.PI/n,rr=R*(v/max);return [cx+Math.cos(a)*rr,cy+Math.sin(a)*rr];};
+    [25,50,75,100].forEach(level=>{const pts=items.map((_,i)=>pt(i,level).join(',')).join(' ');el('polygon',{points:pts,class:'radar-grid'+(level===ref?' refgrid':'')},svg);});
+    items.forEach((it,i)=>{const [x2,y2]=pt(i,max);el('line',{x1:cx,y1:cy,x2:x2,y2:y2,class:'radar-axis'},svg);const [lx,ly]=pt(i,compact?118:114);const t=el('text',{x:lx,y:ly,class:'radar-label','text-anchor':lx<cx-5?'end':lx>cx+5?'start':'middle'},svg);t.textContent=it.label;});
+    const poly=items.map((it,i)=>pt(i,Math.max(0,Math.min(max,it.value))).join(',')).join(' ');
+    el('polygon',{points:poly,class:'radar-area'},svg);
+    items.forEach((it,i)=>{const [px,py]=pt(i,Math.max(0,Math.min(max,it.value)));el('circle',{cx:px,cy:py,r:compact?3.5:5,class:'radar-dot'},svg);if(!compact){const t=el('text',{x:px,y:py-10,class:'radar-val','text-anchor':'middle'},svg);t.textContent=Math.round(it.value);}});
+    return svg;
+  }
+
+  window.FCH = { candle, bars, spark, lines, radar };
 })();

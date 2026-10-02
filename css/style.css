@@ -265,3 +265,25 @@ footer p{margin:4px 0}
   .mkt-head .idx{font-size:32px}
   .row3{grid-template-columns:1fr 1fr}
 }
+
+/* fitness navigation redesign */
+.live-dot{background:var(--accent);box-shadow:0 0 0 0 rgba(34,227,161,.5)}
+.lv-price .unit,.q-price .unit{font-weight:700}
+.radar-host{min-height:300px}
+svg .traj{fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+svg .traj.base{stroke:#e9edf4}
+svg .traj.improve{stroke:var(--accent);stroke-dasharray:7 5}
+svg .traj.risk{stroke:var(--gold);stroke-dasharray:4 5}
+.radar-grid{fill:none;stroke:var(--line2);stroke-width:1}
+.radar-grid.refgrid{stroke:var(--accent);stroke-dasharray:4 4;opacity:.65}
+.radar-axis{stroke:var(--line2);stroke-width:1}
+.radar-area{fill:rgba(34,227,161,.14);stroke:var(--accent);stroke-width:2.2}
+.radar-dot{fill:var(--accent);stroke:var(--panel);stroke-width:2}
+.radar-label{fill:var(--muted);font-size:12px;font-weight:700}
+.radar-val{fill:var(--text);font-size:11px;font-weight:800;paint-order:stroke;stroke:var(--panel);stroke-width:3px}
+.legend-line{width:18px!important;height:0!important;border-radius:0!important;background:transparent!important;border-top:2px solid var(--text);vertical-align:3px!important}
+.legend-line.improve{border-top-color:var(--accent);border-top-style:dashed}
+.legend-line.risk{border-top-color:var(--gold);border-top-style:dashed}
+.legend-line.cutoff{border-top-color:var(--gold);border-top-style:dotted}
+.rating{color:var(--text)}
+.report .stamp{color:rgba(34,227,161,.35);border-color:rgba(34,227,161,.25)}
