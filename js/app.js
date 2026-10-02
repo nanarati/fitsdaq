@@ -87,6 +87,12 @@
         if (raw.fig8 == null || raw.fig8 < 5 || raw.fig8 > 60) return fail('8자보행 기록은 5~60초 사이로 입력하거나 \'잘 모르겠어요\'를 눌러 주세요.');
       } else { raw.walk = $('#f-walk').value; raw.fall = $('#f-fall').checked; }
     }
+    const pbf = num('#f-pbf');
+    if (pbf != null) { if (pbf < 2 || pbf > 70) return fail('체지방률은 2~70% 사이로 입력해 주세요.'); raw.bodyFat = pbf; }
+    const smm = num('#f-smm');
+    if (smm != null) { if (smm < 5 || smm > 80) return fail('골격근량은 5~80kg 사이로 입력해 주세요.'); raw.smm = smm; }
+    const vfl = num('#f-vfl');
+    if (vfl != null) { if (vfl < 1 || vfl > 20) return fail('내장지방레벨은 1~20 사이로 입력해 주세요.'); raw.vfl = Math.round(vfl); }
     const s = num('#f-sbp');
     if (s != null) { if (s < 80 || s > 200) return fail('혈압은 80~200mmHg 사이로 입력해 주세요.'); raw.sbp = s; }
     if (!silent) err('');
@@ -102,13 +108,16 @@
     else { setSeg('[data-mode=vo2]', 'q'); $('#f-par').value = raw.par != null ? raw.par : 2; }
     if (raw.fig8 != null) { setSeg('[data-mode=fig8]', 'in'); $('#f-fig8').value = raw.fig8; }
     else { setSeg('[data-mode=fig8]', 'q'); $('#f-walk').value = raw.walk || 'normal'; $('#f-fall').checked = !!raw.fall; }
+    $('#f-pbf').value = raw.bodyFat != null ? raw.bodyFat : '';
+    $('#f-smm').value = raw.smm != null ? raw.smm : '';
+    $('#f-vfl').value = raw.vfl != null ? raw.vfl : '';
     $('#f-sbp').value = raw.sbp || '';
     syncAgeBoxes();
   }
 
   const SAMPLES = {
-    a: { name: '예시·직장인', sex: 'F', age: 43, h: 162, w: 58, grip: 24, par: 2, sbp: 124 },
-    b: { name: '예시·어르신', sex: 'M', age: 71, h: 168, w: 66, grip: 33, walk: 'normal', sbp: 132 }
+    a: { name: '예시·직장인', sex: 'F', age: 43, h: 162, w: 58, grip: 24, par: 2, bodyFat: 27.2, smm: 21.4, vfl: 8, sbp: 124 },
+    b: { name: '예시·어르신', sex: 'M', age: 71, h: 168, w: 66, grip: 33, walk: 'normal', bodyFat: 22.5, smm: 24.1, vfl: 8, sbp: 132 }
   };
   $$('[data-sample]').forEach(b => b.addEventListener('click', () => {
     const raw = SAMPLES[b.dataset.sample];
@@ -179,6 +188,7 @@
     renderMap(r);
     renderLife(r);
     renderFin(r);
+    renderBodyComp(r);
     renderReport(r);
     renderPortfolio(r);
     renderTwins(r);
@@ -240,7 +250,7 @@
     $('#fin').innerHTML = order.filter(k => r.c[k]).map(k => {
       const c = r.c[k];
       let pos;
-      if (c.neutral) pos = `건강기준 ${Math.round(c.score)}점`;
+      if (c.neutral) pos = c.key === 'body' && c.bodyFat != null ? `체성분 균형 ${Math.round(c.score)}점` : `건강기준 ${Math.round(c.score)}점`;
       else { const t = 100 - c.pct; pos = '비교군 ' + (t <= 50 ? `상위 ${Math.max(1, Math.round(t))}%` : `하위 ${Math.max(1, Math.round(c.pct))}%`); }
       const fill = c.neutral ? c.score : c.pct;
       const mk = c.neutral ? '' : `<div class="mk" style="left:calc(${c.pct}% - 1px)"></div>`;
@@ -250,6 +260,34 @@
         <div class="meter"><div class="mid"></div><div class="fill" style="width:${fill}%"></div>${mk}</div></div>
         <div class="rating">${Math.round(c.score)}점</div></div>`;
     }).join('');
+  }
+
+  function renderBodyComp(r) {
+    const u = r.u, card = $('#bodycomp-card');
+    const has = u.bodyFat != null || u.smm != null || u.vfl != null;
+    card.hidden = !has;
+    if (!has) return;
+    const metrics = [];
+    const range = u.sex === 'F' ? [18, 28] : [10, 20];
+    if (u.bodyFat != null) {
+      let status = '참고범위 안';
+      if (u.bodyFat < range[0]) status = '참고범위보다 낮음';
+      else if (u.bodyFat > range[1]) status = '참고범위보다 높음';
+      metrics.push({ k:'체지방률', v:f1(u.bodyFat) + '%', s:status + ' · ' + range[0] + '–' + range[1] + '%' });
+    }
+    if (u.smm != null) metrics.push({ k:'골격근량', v:f1(u.smm) + 'kg', s:'변화 추적용 실측값' });
+    if (u.smi != null) metrics.push({ k:'SMI', v:f1(u.smi), s:'kg/m² · 키 보정 골격근지수' });
+    if (u.vfl != null) metrics.push({ k:'내장지방레벨', v:String(Math.round(u.vfl)), s:u.vfl < 10 ? '10 미만 참고범위' : '10 이상 · 추세 확인' });
+    $('#bodycomp-metrics').innerHTML = metrics.map(m => `<div class="bodycomp-metric"><span>${m.k}</span><b class="num">${m.v}</b><small>${m.s}</small></div>`).join('');
+    const parts = [];
+    if (u.bodyFat != null) {
+      if (u.bodyFat > range[1]) parts.push('체지방을 낮추는 방향');
+      else if (u.bodyFat < range[0]) parts.push('체지방을 과도하게 더 낮추지 않는 방향');
+      else parts.push('현재 체지방 범위를 유지하는 방향');
+    }
+    if (u.smm != null) parts.push('골격근량을 유지하거나 천천히 늘리는 방향');
+    if (u.vfl != null && u.vfl >= 10) parts.push('내장지방레벨의 감소 추세 확인');
+    $('#bodycomp-summary').textContent = parts.length ? parts.join(' · ') : '체성분 측정값을 변화 추적으로 활용합니다.';
   }
 
   function renderReport(r) {
@@ -264,6 +302,9 @@
     else if (r.score >= 65) head = `${s.label}이 강점이고 ${w.label} 보완 여지가 있습니다`;
     else if (r.score >= 45) head = `${w.label}을 먼저 개선하면 전체 균형이 좋아집니다`;
     else head = `${w.label} 중심의 기초 체력 회복이 우선입니다`;
+    const bodyRoute = w.key === 'body' && u.bodyFat != null
+      ? (u.bodyFat > (u.sex === 'F' ? 28 : 20) ? ' 체지방 감소와 골격근량 유지 방향을 우선해볼 수 있습니다.' : ' 현재 체지방 범위를 유지하면서 골격근량 변화를 함께 추적해보세요.')
+      : '';
     $('#report').innerHTML = `<div class="stamp">FITNESS NAVIGATION</div>
       <div class="rh"><div><div class="t">체력 해석 · ${date} · ${r.sector} 비교군</div><h4>${esc(u.name)} — “${head}”</h4></div>
       <div class="tp"><div class="t">종합 체력지수</div><div class="v num">${f1(r.score)} / 100</div><div class="t" style="margin-top:6px">12주 개선 시나리오</div><div class="v num">${f1(targetScore)}점</div></div></div>
@@ -271,7 +312,7 @@
         <div><h5>강점</h5><p>${s.label}(${s.sub}) 영역이 ${posTxt(s)} 수준으로 가장 돋보입니다.</p></div>
         <div><h5>우선 확인할 영역</h5><p>${w.label}이 현재 가장 낮은 영역입니다. 점수 하나를 좋고 나쁨으로 단정하기보다 다른 영역과의 균형을 함께 보는 것이 중요합니다.</p></div>
         <div><h5>주의 신호</h5>${rep.risks.length ? '<ul>' + rep.risks.map(x => `<li>${x}</li>`).join('') + '</ul>' : '<p>현재 입력값에서 별도로 강조할 주의 신호는 없습니다.</p>'}</div>
-        <div><h5>12주 추천 경로</h5><p>${w.label}을 중심으로 ${rep.picks[0].name}·${rep.picks[1].name} 같은 활동을 조합해볼 수 있습니다. 이 시나리오는 약한 영역 +12점, 다음 영역 +6점을 가정한 계산이며 실제 향상을 보장하지 않습니다.${anyEst ? ' 추정값이 포함되어 있으므로 실측하면 비교 정확도가 높아집니다.' : ''}</p></div>
+        <div><h5>12주 추천 경로</h5><p>${w.label}을 중심으로 ${rep.picks[0].name}·${rep.picks[1].name} 같은 활동을 조합해볼 수 있습니다.${bodyRoute} 이 시나리오는 약한 영역 +12점, 다음 영역 +6점을 가정한 계산이며 실제 향상을 보장하지 않습니다.${anyEst ? ' 추정값이 포함되어 있으므로 실측하면 비교 정확도가 높아집니다.' : ''}</p></div>
       </div>
       <p class="cap">* 합성데이터 기반 비교·시나리오이며 의료 진단이나 치료 권고가 아닙니다.</p>`;
   }
@@ -566,7 +607,7 @@
     clearTimeout(rz);
     rz = setTimeout(() => {
       const v = (location.hash || '#home').slice(1);
-      if (v === 'stock' && state.res) { renderMap(state.res); renderLife(state.res); renderWeekday(); renderHistory(); }
+      if (v === 'stock' && state.res) { renderMap(state.res); renderLife(state.res); renderBodyComp(state.res); renderWeekday(); renderHistory(); }
       if (v === 'market') renderMarket();
       if (v === 'board') renderSido();
       if (v === 'home') { tape(); renderLive(); }
