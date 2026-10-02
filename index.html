@@ -3,16 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>핏스닥 FITSDAQ — 내 체력의 현재 위치와 방향</title>
+<title>AXIVA 액시바 — 내 체력의 현재 위치와 방향</title>
 <meta name="description" content="국민체력100 합성데이터를 바탕으로 내 체력의 현재 위치, 또래 비교, 체력나이, 생애 근력 궤적과 맞춤 운동 경로를 보여주는 체력 내비게이션.">
 <meta name="theme-color" content="#0a0d13">
 <meta property="og:type" content="website">
-<meta property="og:title" content="핏스닥 FITSDAQ — 내 몸은 지금 어디에 있을까?">
+<meta property="og:title" content="AXIVA 액시바 — 내 몸은 지금 어디에 있을까?">
 <meta property="og:description" content="내 체력의 현재 좌표와 또래 비교, 12주 개선 방향을 한눈에 확인하세요.">
-<meta property="og:image" content="assets/og.png">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="assets/icon-192.png" type="image/png">
-<link rel="apple-touch-icon" href="assets/icon-192.png">
+<link rel="icon" href="assets/axiva-icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/axiva-icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -21,7 +20,7 @@
 <body>
 <header class="top">
   <div class="wrap">
-    <a class="logo" href="#home" aria-label="핏스닥 홈"><span class="logo-mark">F</span><b>핏스닥</b><small>FITSDAQ</small></a>
+    <a class="logo" href="#home" aria-label="AXIVA 홈"><span class="logo-mark">A</span><b>AXIVA</b><small>액시바</small></a>
     <nav class="tabs" aria-label="주요 메뉴">
       <a href="#home" data-view="home">측정</a>
       <a href="#stock" data-view="stock">내 체력</a>
@@ -68,7 +67,7 @@
       </div>
 
       <div class="card mini-mkt" id="mini-mkt" role="link" tabindex="0" aria-label="국민 체력측정 참여 흐름 보기">
-        <div><div class="lbl">FITSPI · 국민 체력측정 참여지수</div><div class="v num" id="mini-v">-</div><div class="num" id="mini-c" style="font-size:13px"></div></div>
+        <div><div class="lbl">AXI · 국민 체력측정 참여지수</div><div class="v num" id="mini-v">-</div><div class="num" id="mini-c" style="font-size:13px"></div></div>
         <div class="sp" id="mini-sp"></div>
       </div>
     </div>
@@ -195,7 +194,7 @@
         <span class="chip acc">BODY COMPOSITION</span>
       </div>
       <div class="bodycomp-metrics" id="bodycomp-metrics"></div>
-      <p class="cap">체지방률 참고범위는 InBody 공개 안내(남성 10–20%, 여성 18–28%)를 사용합니다. 골격근량·SMI는 표시 및 변화 추적용이며 현재 FITSDAQ 종합점수에는 직접 가중하지 않습니다. 내장지방레벨은 입력 시 10 미만을 참고범위로 표시합니다.</p>
+      <p class="cap">체지방률 참고범위는 InBody 공개 안내(남성 10–20%, 여성 18–28%)를 사용합니다. 골격근량·SMI는 표시 및 변화 추적용이며 현재 AXIVA 종합점수에는 직접 가중하지 않습니다. 내장지방레벨은 입력 시 10 미만을 참고범위로 표시합니다.</p>
     </div>
 
     <div class="card mt">
@@ -237,7 +236,7 @@
 <section id="v-market" class="view" hidden>
   <div class="card">
     <div class="mkt-head">
-      <div><div class="muted" style="font-size:13px">FITSPI · 국민 체력측정 참여지수 (2015.12.31 = 1,000)</div>
+      <div><div class="muted" style="font-size:13px">AXI · 국민 체력측정 참여지수 (2015.12.31 = 1,000)</div>
         <div><span class="idx num" id="m-idx"></span> <span class="num" id="m-chg" style="font-size:17px;font-weight:700"></span></div></div>
       <div class="chip" id="m-asof"></div>
     </div>
@@ -274,7 +273,7 @@
 <section id="v-about" class="view doc" hidden>
   <div class="card">
     <h2>서비스 안내</h2>
-    <p>핏스닥은 국민체육진흥공단이 공공데이터포털에 공개한 국민체력100·스포츠강좌이용권 합성데이터를 활용해, 개인의 체력을 여러 축의 <b>현재 위치와 개선 방향</b>으로 보여주는 체력 내비게이션입니다. 실제 개인 기록이 아닌 합성데이터를 비교 기준으로 사용합니다.</p>
+    <p>AXIVA은 국민체육진흥공단이 공공데이터포털에 공개한 국민체력100·스포츠강좌이용권 합성데이터를 활용해, 개인의 체력을 여러 축의 <b>현재 위치와 개선 방향</b>으로 보여주는 체력 내비게이션입니다. 실제 개인 기록이 아닌 합성데이터를 비교 기준으로 사용합니다.</p>
   </div>
 
   <div class="card mt">
@@ -296,7 +295,7 @@
       <li><b>종합 체력지수</b>: 근력 35%, 심폐지구력(65세 이상은 8자보행) 40%, 체성분 15%, 혈압 10%를 가중 평균한 100점 만점 지수입니다. 혈압 미입력 시 나머지 비중을 다시 나눕니다.</li>
       <li><b>근력</b>: 64세 이하는 체중 대비 악력(상대악력), 65세 이상은 악력(kg)으로 평가합니다.</li>
       <li><b>체성분</b>: 기본은 BMI를 사용합니다. 체지방률을 입력하면 BMI와 함께 체성분 점수에 반영하며, 내장지방레벨 입력 시 보조적으로 반영합니다. 골격근량은 SMI(골격근량÷키²)로 표시하지만 비교 데이터가 없으므로 종합점수에는 직접 넣지 않습니다.</li>
-      <li><b>체성분 참고범위</b>: 체지방률은 InBody 공개 안내의 남성 10–20%, 여성 18–28%를 참고합니다. 내장지방레벨은 성인 10 미만을 참고범위로 표시합니다. 범위 밖 점수화는 FITSDAQ 내부 시각화 규칙이며 의료 진단 기준이 아닙니다.</li>
+      <li><b>체성분 참고범위</b>: 체지방률은 InBody 공개 안내의 남성 10–20%, 여성 18–28%를 참고합니다. 내장지방레벨은 성인 10 미만을 참고범위로 표시합니다. 범위 밖 점수화는 AXIVA 내부 시각화 규칙이며 의료 진단 기준이 아닙니다.</li>
       <li><b>혈압</b>: 입력 시 건강 기준 구간에 가까울수록 높은 참고점수를 줍니다.</li>
       <li><b>체력나이</b>: VO₂max(65세 이상은 8자보행)의 연령별 중앙값과 근력 위치를 함께 사용해 추정합니다.</li>
       <li><b>생애 근력 궤적</b>: 현재 악력 위치를 유지한 기준 경로와 운동 습관에 따른 개선·감소 시나리오를 표시합니다. 주의선은 AWGS 2019 악력 기준(남 28kg, 여 18kg)을 사용합니다.</li>
@@ -307,7 +306,7 @@
   <div class="card mt">
     <h3>유의사항</h3>
     <ul>
-      <li>핏스닥은 건강 상태를 진단하는 의료 서비스가 아닙니다. 결과는 합성데이터와의 비교로 만든 참고 정보입니다.</li>
+      <li>AXIVA은 건강 상태를 진단하는 의료 서비스가 아닙니다. 결과는 합성데이터와의 비교로 만든 참고 정보입니다.</li>
       <li>12주 예상값과 생애 궤적은 시나리오이며 개인의 실제 미래 상태를 보장하지 않습니다.</li>
       <li>정확한 측정은 가까운 국민체력100 체력인증센터에서 받을 수 있습니다. <a href="https://nfa.kspo.or.kr" target="_blank" rel="noopener">국민체력100 바로가기</a></li>
       <li>본 서비스는 공공데이터 활용 개인 개발 서비스이며 국민체육진흥공단의 공식 서비스가 아닙니다.</li>
@@ -324,7 +323,7 @@
 
 <footer>
   <div class="wrap">
-    <p><b style="color:var(--text)">핏스닥 FITSDAQ</b> · Fitness Navigation · 운영: 김현우 · 2026</p>
+    <p><b style="color:var(--text)">AXIVA 액시바</b> · Fitness Navigation · 운영: 김현우 · 2026</p>
     <p>데이터 출처: 서울올림픽기념국민체육진흥공단, 공공데이터포털(data.go.kr) — 국민체력100 및 스포츠강좌이용권 합성데이터</p>
     <p>본 서비스는 의료 진단이나 금융 정보가 아니며 국민체육진흥공단의 공식 서비스가 아닙니다.</p>
   </div>
