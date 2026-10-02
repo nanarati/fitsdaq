@@ -1,4 +1,4 @@
-/* 핏스닥 FITSDAQ — 화면 로직 */
+/* AXIVA — 화면 로직 */
 (function () {
   'use strict';
   const $ = s => document.querySelector(s);
@@ -384,8 +384,8 @@
     x.fillStyle = g; x.fillRect(0, 0, W, H);
     const lg = x.createLinearGradient(70,70,140,140); lg.addColorStop(0,'#22e3a1'); lg.addColorStop(1,'#0fa3ff');
     x.fillStyle = lg; rr(x,70,70,64,64,14); x.fill();
-    x.fillStyle='#06110c'; x.font=`900 40px ${F}`; x.textAlign='center'; x.fillText('F',102,117);
-    x.textAlign='left'; x.fillStyle='#e9edf4'; x.font=`900 40px ${F}`; x.fillText('핏스닥',152,115);
+    x.fillStyle='#06110c'; x.font=`900 40px ${F}`; x.textAlign='center'; x.fillText('A',102,117);
+    x.textAlign='left'; x.fillStyle='#e9edf4'; x.font=`900 40px ${F}`; x.fillText('AXIVA',152,115);
     x.fillStyle='#8c96aa'; x.font=`500 24px ${F}`; x.fillText('FITNESS NAVIGATION',320,113);
     x.fillStyle='#e9edf4'; x.font=`900 62px ${F}`; x.fillText(r.u.name,70,245);
     x.fillStyle='#8c96aa'; x.font=`500 28px ${F}`; x.fillText(r.sector + ' 비교군',70,294);
@@ -428,12 +428,12 @@
   $('#btn-dl').addEventListener('click', () => {
     const cv = $('#share-canvas');
     const a = document.createElement('a');
-    a.download = 'fitsdaq-' + (state.res ? state.res.code : 'card') + '.png';
+    a.download = 'axiva-' + (state.res ? state.res.code : 'card') + '.png';
     a.href = cv.toDataURL('image/png');
     document.body.appendChild(a); a.click(); a.remove();
   });
 
-  /* ---------- 핏스피 ---------- */
+  /* ---------- AXI ---------- */
   function seasonality() {
     const start = MKT.vol.start.split('-').map(Number);
     const sums = new Array(12).fill(0), cnt = new Array(12).fill(0);
