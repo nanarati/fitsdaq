@@ -1,7 +1,7 @@
 {
-  "name": "핏스닥 FITSDAQ — 내 체력의 현재 위치와 방향",
-  "short_name": "핏스닥",
-  "description": "국민체력100 합성데이터 기반 체력 내비게이션",
+  "name": "AXIVA 액시바 — 내 몸의 현재 좌표와 방향",
+  "short_name": "AXIVA",
+  "description": "근력·심폐·체성분·혈압을 여러 축으로 읽는 바디·피트니스 내비게이션",
   "start_url": "./#home",
   "scope": "./",
   "display": "standalone",
@@ -9,7 +9,6 @@
   "theme_color": "#0a0d13",
   "lang": "ko",
   "icons": [
-    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "assets/axiva-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ]
 }
