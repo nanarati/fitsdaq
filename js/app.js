@@ -52,7 +52,7 @@
     const b = seg.querySelector(`button[data-v="${v}"]`); if (b) b.click();
   }
 
-  /* ---------- 상장 신청서 ---------- */
+  /* ---------- 체력 측정 ---------- */
   const ageInput = $('#f-age');
   function syncAgeBoxes() {
     const a = +ageInput.value;
@@ -134,7 +134,7 @@
     if (location.hash === '#stock') renderStock(); else location.hash = '#stock';
   }
 
-  /* ---------- 내 종목 ---------- */
+  /* ---------- 내 체력 ---------- */
   function renderStock() {
     if (!state.res) {
       const s = store.get();
@@ -142,7 +142,7 @@
       else { state.raw = SAMPLES.a; state.res = FX.evaluate(SAMPLES.a); state.sample = true; }
     }
     $('#demo-banner').hidden = !state.sample;
-    if (state.sample && state.raw) $('#demo-name').textContent = '예시 종목(' + state.raw.age + '세 ' + (state.raw.sex === 'F' ? '여성' : '남성') + ')';
+    if (state.sample && state.raw) $('#demo-name').textContent = '예시 체력(' + state.raw.age + '세 ' + (state.raw.sex === 'F' ? '여성' : '남성') + ')';
     $('#stock-empty').hidden = !!state.res;
     $('#stock-body').hidden = !state.res;
     if (!state.res) return;
@@ -316,10 +316,10 @@
     const host = $('#hist');
     if (!h.length) { host.innerHTML = `<p class="muted" style="margin:0">${state.sample ? '예시 결과는 기록에 저장되지 않습니다.' : '아직 측정 기록이 없습니다.'}</p>`; return; }
     const last = h.slice(-8).reverse();
-    host.innerHTML = `<div id="hist-sp" class="chart-host" style="min-height:56px"></div><div class="tbl-scroll"><table class="t"><tr><th>공시일</th><th>종목명</th><th>주가</th><th>체력나이</th></tr>${last.map(x => {
+    host.innerHTML = `<div id="hist-sp" class="chart-host" style="min-height:56px"></div><div class="tbl-scroll"><table class="t"><tr><th>측정일</th><th>이름</th><th>체력지수</th><th>체력나이</th></tr>${last.map(x => {
       const d = new Date(x.t);
       return `<tr><td class="num">${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}</td><td>${esc(x.name)}</td><td class="num">${f1(x.score != null ? x.score : (x.price || 0) / 1000)}</td><td class="num">${x.fitAge != null ? x.fitAge + '세' : '-'}</td></tr>`;
-    }).join('')}</table></div><p class="cap">${h.length < 2 ? '운동 후 다시 측정해 \'다시 측정\'를 누르면 내 주가 흐름이 차트로 쌓입니다.' : '최근 측정 ' + h.length + '건의 체력지수 흐름입니다.'}</p>`;
+    }).join('')}</table></div><p class="cap">${h.length < 2 ? '운동 후 다시 측정하면 내 체력지수 변화가 기록됩니다.' : '최근 측정 ' + h.length + '건의 체력지수 흐름입니다.'}</p>`;
     if (h.length >= 2) FCH.spark($('#hist-sp'), h.map(x => x.score != null ? x.score : (x.price || 0) / 1000), { height: 56 });
   }
 
@@ -445,7 +445,7 @@
     mktDone = true;
   }
 
-  /* ---------- 종목 시세판 ---------- */
+  /* ---------- 운동 이용 데이터 ---------- */
   const SIDO = { 11: '서울', 26: '부산', 27: '대구', 28: '인천', 29: '광주', 30: '대전', 31: '울산', 36: '세종', 41: '경기', 43: '충북', 44: '충남', 46: '전남', 47: '경북', 48: '경남', 50: '제주', 51: '강원', 52: '전북', 12: '기타(코드 12)' };
   let boardSrc = 'vs', boardSort = { k: 1, dir: -1 };
   function renderBoard() {
@@ -479,11 +479,11 @@
   function renderSido() {
     const c = $('#b-sido').value, rows = BOARD.sd[c] || [];
     const tot = rows.reduce((a, r) => a + r[1], 0);
-    FCH.bars($('#ch-sido'), { labels: rows.map(r => r[0].replace('(줌바 등)', '')), values: rows.map(r => r[1]), highlight: [0], fmt: v => fmt(v) + '건', height: 190, aria: '시도별 인기 종목' });
+    FCH.bars($('#ch-sido'), { labels: rows.map(r => r[0].replace('(줌바 등)', '')), values: rows.map(r => r[1]), highlight: [0], fmt: v => fmt(v) + '건', height: 190, aria: '시도별 인기 운동' });
   }
   $('#b-src').addEventListener('pick', e => { boardSrc = e.detail; boardSort = { k: 1, dir: -1 }; renderBoard(); });
 
-  /* ---------- 실시간 시세 미리보기 ---------- */
+  /* ---------- 체력 좌표 미리보기 ---------- */
   let liveRaw = SAMPLES.a, liveIsUser = false, lastLivePrice = null, liveTimer;
   function renderLive() {
     const raw = readForm(true);
@@ -550,7 +550,7 @@
     clearTimeout(rz);
     rz = setTimeout(() => {
       const v = (location.hash || '#home').slice(1);
-      if (v === 'stock' && state.res) { renderLife(state.res); renderWeekday(); renderHistory(); }
+      if (v === 'stock' && state.res) { renderMap(state.res); renderLife(state.res); renderWeekday(); renderHistory(); }
       if (v === 'market') renderMarket();
       if (v === 'board') renderSido();
       if (v === 'home') { tape(); renderLive(); }
