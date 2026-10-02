@@ -316,3 +316,19 @@ body{
   .route-strip>div:nth-of-type(3){grid-column:1/4}
   .route-strip>i:nth-of-type(2){display:none}
 }
+
+/* optional body composition */
+.bodycomp-input{border-style:solid;border-color:rgba(61,184,255,.22);background:linear-gradient(145deg,rgba(61,184,255,.035),rgba(34,227,161,.025))}
+.box-hint{margin:0 0 10px;color:var(--muted);font-size:12px;line-height:1.5}
+.box-hint.foot{margin:8px 0 0;font-size:11.5px}
+.bodycomp-vfl{margin:10px 0 0}
+.bodycomp-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap}
+.bodycomp-head h3{margin-bottom:2px}
+.bodycomp-head .cap{margin-top:0;max-width:720px}
+.bodycomp-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.bodycomp-metric{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:13px 14px}
+.bodycomp-metric span{display:block;color:var(--muted);font-size:11.5px}
+.bodycomp-metric b{display:block;font-size:22px;line-height:1.25;margin:3px 0}
+.bodycomp-metric small{display:block;font-size:11.5px;line-height:1.4}
+@media (max-width:760px){.bodycomp-metrics{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:420px){.bodycomp-metrics{grid-template-columns:1fr}}
