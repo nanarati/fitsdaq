@@ -40,7 +40,7 @@
     <div>
       <span class="eyebrow">국민체력100 합성데이터 기반 · FITNESS NAVIGATION</span>
       <h1>내 몸은 지금<br><em>어디에 있을까?</em></h1>
-      <p class="lead">체력을 가격 하나로 바꾸지 않습니다. 근력·심폐지구력·체성분·혈압을 각각 보고, 같은 연령·성별 사람들과 비교해 현재 위치와 앞으로의 개선 방향을 보여줍니다.</p>
+      <p class="lead">체력을 가격 하나로 바꾸지 않습니다. 근력·심폐지구력·체성분·혈압을 각각 보고, 체성분계 값이 있다면 체지방률·골격근량까지 더해 현재 위치와 앞으로의 개선 방향을 보여줍니다.</p>
 
       <div class="card live" id="live" aria-live="polite">
         <div class="live-top"><span class="live-dot" aria-hidden="true"></span><b>현재 체력 좌표</b><span class="chip" id="lv-tag">예시 · 43세 직장인</span><span class="muted lv-hint" id="lv-hint">측정값을 입력하면 내 체력 지도로 바로 바뀝니다</span></div>
@@ -120,6 +120,17 @@
         </div></div>
       </div>
 
+      <div class="box bodycomp-input" id="box-bodycomp">
+        <div class="lab"><span>체성분 측정값 <small>선택 · InBody 등 BIA 체성분계</small></span></div>
+        <p class="box-hint">결과지가 있다면 아는 값만 입력하세요. 체지방률은 체성분 점수에 반영하고, 골격근량은 별도 균형 지표로 보여줍니다.</p>
+        <div class="row">
+          <div class="field" style="margin:0"><label for="f-pbf">체지방률 (%)</label><input type="number" id="f-pbf" min="2" max="70" step="0.1" inputmode="decimal" placeholder="예: 24.5"></div>
+          <div class="field" style="margin:0"><label for="f-smm">골격근량 (kg)</label><input type="number" id="f-smm" min="5" max="80" step="0.1" inputmode="decimal" placeholder="예: 28.4"></div>
+        </div>
+        <div class="field bodycomp-vfl"><label for="f-vfl">내장지방레벨 (선택)</label><input type="number" id="f-vfl" min="1" max="20" step="1" inputmode="numeric" placeholder="기기에 표시되는 경우 1~20"></div>
+        <p class="box-hint foot">체성분계 모델에 따라 제공 항목이 다릅니다. 입력하지 않아도 기존 BMI 기반 계산으로 정상 작동합니다.</p>
+      </div>
+
       <div class="field"><label for="f-sbp">혈압 수축기 (mmHg, 선택)</label><input type="number" id="f-sbp" min="80" max="200" inputmode="numeric" placeholder="모르면 비워두세요"></div>
       <div class="err" id="f-err" role="alert"></div>
       <p class="privacy">🔒 <span>입력값은 이 기기의 브라우저 안에서만 계산되며 어떤 서버로도 전송되지 않습니다.</span></p>
@@ -176,6 +187,15 @@
         <div id="fin"></div>
         <p class="cap">막대의 흰 눈금이 비교군 안에서 내 위치입니다. <span class="est">추정</span> 표시는 생활 질문으로 추정한 값입니다.</p>
       </div>
+    </div>
+
+    <div class="card mt bodycomp-card" id="bodycomp-card" hidden>
+      <div class="bodycomp-head">
+        <div><h3>근육–지방 균형 <small>선택 입력한 체성분 측정값</small></h3><p class="cap" id="bodycomp-summary"></p></div>
+        <span class="chip acc">BODY COMPOSITION</span>
+      </div>
+      <div class="bodycomp-metrics" id="bodycomp-metrics"></div>
+      <p class="cap">체지방률 참고범위는 InBody 공개 안내(남성 10–20%, 여성 18–28%)를 사용합니다. 골격근량·SMI는 표시 및 변화 추적용이며 현재 FITSDAQ 종합점수에는 직접 가중하지 않습니다. 내장지방레벨은 입력 시 10 미만을 참고범위로 표시합니다.</p>
     </div>
 
     <div class="card mt">
@@ -275,7 +295,9 @@
       <li><b>비교군</b>: 성별 × 5세 연령 구간. 각 비교군의 측정값을 분위수로 요약해 내 위치를 계산합니다.</li>
       <li><b>종합 체력지수</b>: 근력 35%, 심폐지구력(65세 이상은 8자보행) 40%, 체성분 15%, 혈압 10%를 가중 평균한 100점 만점 지수입니다. 혈압 미입력 시 나머지 비중을 다시 나눕니다.</li>
       <li><b>근력</b>: 64세 이하는 체중 대비 악력(상대악력), 65세 이상은 악력(kg)으로 평가합니다.</li>
-      <li><b>체성분·혈압</b>: 백분위가 아니라 건강 기준 구간에 가까울수록 높은 점수를 줍니다.</li>
+      <li><b>체성분</b>: 기본은 BMI를 사용합니다. 체지방률을 입력하면 BMI와 함께 체성분 점수에 반영하며, 내장지방레벨 입력 시 보조적으로 반영합니다. 골격근량은 SMI(골격근량÷키²)로 표시하지만 비교 데이터가 없으므로 종합점수에는 직접 넣지 않습니다.</li>
+      <li><b>체성분 참고범위</b>: 체지방률은 InBody 공개 안내의 남성 10–20%, 여성 18–28%를 참고합니다. 내장지방레벨은 성인 10 미만을 참고범위로 표시합니다. 범위 밖 점수화는 FITSDAQ 내부 시각화 규칙이며 의료 진단 기준이 아닙니다.</li>
+      <li><b>혈압</b>: 입력 시 건강 기준 구간에 가까울수록 높은 참고점수를 줍니다.</li>
       <li><b>체력나이</b>: VO₂max(65세 이상은 8자보행)의 연령별 중앙값과 근력 위치를 함께 사용해 추정합니다.</li>
       <li><b>생애 근력 궤적</b>: 현재 악력 위치를 유지한 기준 경로와 운동 습관에 따른 개선·감소 시나리오를 표시합니다. 주의선은 AWGS 2019 악력 기준(남 28kg, 여 18kg)을 사용합니다.</li>
       <li><b>12주 예상지수</b>: 가장 약한 영역을 12점, 다음 약한 영역을 6점 개선하는 가상 시나리오로 계산합니다. 실제 향상 정도를 보장하는 예측은 아닙니다.</li>
